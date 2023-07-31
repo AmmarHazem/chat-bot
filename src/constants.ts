@@ -1,0 +1,10 @@
+export const bullQueueRedisHostName = process.env.HUBSPOT_QUEUE_REDIS_HOST_NAME ?? "";
+export const bullQueueRedisPort = Number(process.env.HUBSPOT_QUEUE_REDIS_PORT ?? "");
+export const bullQueueRedisURL = `rediss://${bullQueueRedisHostName}:${bullQueueRedisPort}`;
+export const bullQueueRedisPassword = process.env.HUBSPOT_QUEUE_REDIS_PASSWORD ?? "";
+export const encryptionKey = process.env.ENCRYPTION_KEY ?? "";
+export const redisHostName = process.env.REDIS_HOST_NAME;
+export const redisPort = process.env.REDIS_PORT;
+export const redisURL = `rediss://${redisHostName}:${redisPort}`;
+export const redisPassword = process.env.REDIS_PASSWORD;
+export const mailchimpAPIKey = process.env.MAILCHIMP_API_KEY ?? "";
