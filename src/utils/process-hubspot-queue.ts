@@ -9,10 +9,11 @@ import { HubspotConversationMessagesResponseModel } from "../models/HubspotConve
 import { HubspotMessageDetailsResponseModel } from "../models/HubspotMessageDetailsResponseModel";
 import { conversationalRetrieval } from "./lang-chain-bot";
 
+const ifEnvProd = process.env.mode === "PROD";
+
 async function processHubspotQueue(job: Bull.Job<HubspotJobModel>) {
   console.log("+++ processHubspotQueue");
   const { webhookMessage, accessToken } = job.data;
-  console.log("-- ", webhookMessage, accessToken);
   const replyToHubspotMessageResponse = await generateReplyToHubspotMessage(webhookMessage, accessToken);
   if (!replyToHubspotMessageResponse) {
     return { success: 1 };
@@ -317,7 +318,7 @@ async function sendHubspotMessage({
   accessToken: string;
 }) {
   try {
-    if (process.env.mode === "PROD") {
+    if (ifEnvProd) {
       const headers = {
         Authorization: `Bearer ${accessToken}`,
       };
