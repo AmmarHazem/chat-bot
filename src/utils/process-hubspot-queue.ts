@@ -202,10 +202,12 @@ async function checkIfShouldStopReplyingToConversationFromHubspot({
 }) {
   const conversation = await getHubspotConversation(conversationID, accessToken);
   const stopReplyingToConversation = conversation?.results?.some((msg) => {
+    // console.log('--- stop ', msg?.client?.clientType, msg?.status?.statusType, msg?.direction)
     if (msg?.client?.clientType === "HUBSPOT" && msg?.status?.statusType === "SENT" && msg?.direction === "OUTGOING") {
       const messageText = msg.text?.toLowerCase() ?? "";
       let stopReplying = false;
       for (const name of namesToStopTheBotFromReplying) {
+        // console.log('--- msg text', messageText)
         if (messageText.includes(name)) {
           stopReplying = true;
         }
@@ -225,6 +227,18 @@ function setStopReplyingToConversationInRedis({ conversationID }: { conversation
   return redisClient.set(stopReplyingToConversationRedisKey, "true");
 }
 
+// async function checkIfShouldStopReplyingToHubspotMessageDetails(msg: HubspotMessageDetailsResponseModel): Promise<boolean> {
+//   const msgText = msg.text?.toLocaleLowerCase();
+//   let stopReplying = false;
+//   for (const name of namesToStopTheBotFromReplying) {
+//     if (msgText?.includes(name)) {
+//       stopReplying = true;
+//       await setStopReplyingToConversationInRedis({ conversationID: msg.conversationsThreadId ?? '' })
+//     }
+//   }
+//   return stopReplying;
+// }
+
 async function generateReplyToHubspotMessage(message: HubspotWebhookEventModel, accessToken: string) {
   try {
     if (message.changeFlag !== "NEW_MESSAGE" || message.subscriptionType !== "conversation.newMessage") {
@@ -236,20 +250,20 @@ async function generateReplyToHubspotMessage(message: HubspotWebhookEventModel, 
     ]);
     const messageExistsInRedis = redisPromisesResult[0];
     const stopReplyingToConversationFromRedis = redisPromisesResult[1];
+    console.log("--- stopReplyingToConversationFromRedis", stopReplyingToConversationFromRedis);
     if (stopReplyingToConversationFromRedis) {
-      console.log("--- stopReplyingToConversationFromRedis");
       return null;
     }
     if (messageExistsInRedis && message.messageId !== "e7cfec9de53b07490d3a9e2b4d8d9014") {
-      console.log("--- already replied");
+      // console.log("--- already replied");
       return null;
     }
     const stopReplyingToConversationFromHubspot = await checkIfShouldStopReplyingToConversationFromHubspot({
       accessToken: accessToken,
       conversationID: message.objectId,
     });
+    console.log("--- stopReplyingToConversationFromHubspot", stopReplyingToConversationFromHubspot);
     if (stopReplyingToConversationFromHubspot) {
-      console.log("--- stopReplyingToConversationFromHubspot");
       return null;
     }
     const messageDetails = await getHubspotMessageDetails({
@@ -258,7 +272,7 @@ async function generateReplyToHubspotMessage(message: HubspotWebhookEventModel, 
       messageID: message.messageId,
     });
     if (!messageDetails) {
-      console.log("--- error no message details");
+      // console.log("--- error no message details");
       return null;
     }
     if (messageDetails?.client?.clientType === "INTEGRATION" || messageDetails?.direction === "OUTGOING") {
@@ -324,6 +338,7 @@ async function sendHubspotMessage({
   accessToken: string;
 }) {
   try {
+    // console.log('--- ifEnvProd', ifEnvProd)
     if (ifEnvProd) {
       if (text.toLocaleLowerCase().includes(messageToStopTheBotFromReplying)) {
         await setStopReplyingToConversationInRedis({ conversationID: conversationID });

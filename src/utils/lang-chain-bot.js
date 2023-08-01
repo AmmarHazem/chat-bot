@@ -30,7 +30,7 @@ function getMemory({ conversationID, userID }) {
   // const sessionTime = now.subtract(now.get("minute") % 10, "minute");
   const sessionID = `${conversationID}`; // `${conversationID}-${sessionTime.format()}`;
   console.log("--- memory session id", sessionID);
-  const memory = new BufferMemory({
+  const memory = new BufferWindowMemory({
     chatHistory: new FirestoreChatMessageHistory({
       collectionName: "dardoc_open",
       sessionId: sessionID,
@@ -41,7 +41,7 @@ function getMemory({ conversationID, userID }) {
     inputKey: "question",
     outputKey: "text",
     returnMessages: false,
-    // k: 4,
+    k: 4,
   });
   return memory;
 }
@@ -52,7 +52,6 @@ export const conversationalRetrieval = async ({ question, conversationID, userID
     const promptTemplate = `Your name is Sara. You are a sales driven customer agent at DarDoc. As an agent, your role is to assist users and their inquiries regarding DarDoc's services. To do this, you will receive input as a question from a customer {question}. Answer as how a customer support agent would reply. Your responses should be very human like, and not exceeding 300 characters in count. If you do not have adequate information from the context, strictly respond as "Please give me a few minutes to fetch more information on this. We request you to stay connected with us."
     {context}
     You must never ask the customers to reach out to the customer support team or message us. They consider you as the customer support and you are at the front line facing DarDoc. You are communicating to them through our different messaging platforms.
-    If the customer asks you to create a booking or asks any information about the booking strictly respond "Please give me a few minutes to fetch more information on this. We request you to stay connected with us.
     "`;
     const memory = getMemory({ conversationID, userID });
     const prompt = PromptTemplate.fromTemplate(promptTemplate);
