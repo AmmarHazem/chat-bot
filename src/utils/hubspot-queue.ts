@@ -8,12 +8,12 @@ const isProdEnv = process.env.mode === "PROD";
 const hubspotQueue = new Bull<HubspotJobModel>("hubspotQueue", {
   redis: isProdEnv
     ? {
-        host: bullQueueRedisHostName,
-        password: bullQueueRedisPassword,
-        port: bullQueueRedisPort,
-        // autoResubscribe: true,
-        tls: { servername: bullQueueRedisHostName },
-      }
+      host: bullQueueRedisHostName,
+      password: bullQueueRedisPassword,
+      port: bullQueueRedisPort,
+      // autoResubscribe: true,
+      tls: { servername: bullQueueRedisHostName },
+    }
     : undefined,
 });
 

@@ -215,10 +215,14 @@ async function checkIfShouldStopReplyingToConversationFromHubspot({
     return false;
   });
   if (stopReplyingToConversation) {
-    const stopReplyingToConversationRedisKey = `stop-replying-to-${conversationID}`;
-    await redisClient.set(stopReplyingToConversationRedisKey, "true");
+    await setStopReplyingToConversationInRedis({ conversationID: conversationID.toString() });
   }
   return stopReplyingToConversation;
+}
+
+function setStopReplyingToConversationInRedis({ conversationID }: { conversationID: string }) {
+  const stopReplyingToConversationRedisKey = `stop-replying-to-${conversationID}`;
+  return redisClient.set(stopReplyingToConversationRedisKey, "true");
 }
 
 async function generateReplyToHubspotMessage(message: HubspotWebhookEventModel, accessToken: string) {
@@ -300,6 +304,8 @@ async function generateReplyToHubspotMessage(message: HubspotWebhookEventModel, 
   }
 }
 
+const messageToStopTheBotFromReplying = 'Please give me a few minutes to fetch more information on this. We request you to stay connected with us'.toLocaleLowerCase();
+
 async function sendHubspotMessage({
   messageToReplyTo,
   conversationID,
@@ -319,6 +325,9 @@ async function sendHubspotMessage({
 }) {
   try {
     if (ifEnvProd) {
+      if (text.toLocaleLowerCase().includes(messageToStopTheBotFromReplying)) {
+        await setStopReplyingToConversationInRedis({ conversationID: conversationID });
+      }
       const headers = {
         Authorization: `Bearer ${accessToken}`,
       };
