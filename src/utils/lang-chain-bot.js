@@ -81,16 +81,15 @@ export const conversationalRetrieval = async ({ question, conversationID, userID
       },
     });
     /* Ask it a question */
-    console.log("--- chain.call");
     const res = await chain.call({ question });
-    if (true) {
-      // process.env.mode !== "PROD"
+    if (process.env.mode !== "PROD") {
       console.log("=====");
       console.log("Q:", question);
       console.log();
       console.log("A:", res.text);
       console.log("=====");
     }
+    console.log("--- chain.call");
     return res.text;
   } catch (e) {
     console.log("--- conversationalRetrieval error", e);
