@@ -83,7 +83,8 @@ export const conversationalRetrieval = async ({ question, conversationID, userID
     /* Ask it a question */
     console.log("--- chain.call");
     const res = await chain.call({ question });
-    if (process.env.mode !== "PROD") {
+    if (true) {
+      // process.env.mode !== "PROD"
       console.log("=====");
       console.log("Q:", question);
       console.log();

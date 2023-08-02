@@ -187,11 +187,19 @@ async function getHubspotConversation(
     return res.data;
   } catch (e) {
     console.log("--- getHubspotConversation error", e);
+    await sendEmail({
+      html: `
+      <div>Failed to get conversation from Hubspot</div>
+      <code>${e}</code>
+      `,
+      subject: 'Failed to get conversation from Hubspot',
+      to: ['ammar.hazem@dardoc.com']
+    })
     return null;
   }
 }
 
-const namesToStopTheBotFromReplying = ["argen", "nouf", "dima", "keswin", "adi", "aditya"];
+const namesToStopTheBotFromReplying = ["argen", "nouf", "dima", "keswin", "adi", "aditya", "ammar"];
 
 async function checkIfShouldStopReplyingToConversationFromHubspot({
   conversationID,
@@ -201,13 +209,16 @@ async function checkIfShouldStopReplyingToConversationFromHubspot({
   accessToken: string;
 }) {
   const conversation = await getHubspotConversation(conversationID, accessToken);
+  if (!conversation) {
+    console.log('--- failed to get conversation from hubspot')
+  }
   const stopReplyingToConversation = conversation?.results?.some((msg) => {
     // console.log('--- stop ', msg?.client?.clientType, msg?.status?.statusType, msg?.direction)
     if (msg?.client?.clientType === "HUBSPOT" && msg?.status?.statusType === "SENT" && msg?.direction === "OUTGOING") {
       const messageText = msg.text?.toLowerCase() ?? "";
       let stopReplying = false;
       for (const name of namesToStopTheBotFromReplying) {
-        // console.log('--- msg text', messageText)
+        console.log('--- msg text', messageText)
         if (messageText.includes(name)) {
           stopReplying = true;
         }
@@ -254,7 +265,7 @@ async function generateReplyToHubspotMessage(message: HubspotWebhookEventModel, 
     if (stopReplyingToConversationFromRedis) {
       return null;
     }
-    if (messageExistsInRedis && message.messageId !== "e7cfec9de53b07490d3a9e2b4d8d9014") {
+    if (messageExistsInRedis) {
       // console.log("--- already replied");
       return null;
     }
