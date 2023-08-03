@@ -214,7 +214,7 @@ async function checkIfShouldStopReplyingToConversationFromHubspot({
   }
   const stopReplyingToConversation = conversation?.results?.some((msg) => {
     // console.log('--- stop ', msg?.client?.clientType, msg?.status?.statusType, msg?.direction)
-    if (msg?.client?.clientType === "HUBSPOT" && msg?.status?.statusType === "SENT" && msg?.direction === "OUTGOING") {
+    if (msg?.client?.clientType === "HUBSPOT" && msg?.direction === "OUTGOING") {
       const messageText = msg.text?.toLowerCase() ?? "";
       let stopReplying = false;
       for (const name of namesToStopTheBotFromReplying) {
