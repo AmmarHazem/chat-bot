@@ -35,8 +35,6 @@ export interface HubspotMessageModel {
   assignedTo?: string;
 }
 
-// export type AssignedTo = "A-45325045" | "V-2809951" | "S-hubspot" | "A-51470552";
-
 export interface Client {
   clientType?: ClientType;
   integrationAppId?: number;

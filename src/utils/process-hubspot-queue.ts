@@ -331,6 +331,8 @@ async function generateReplyToHubspotMessage(message: HubspotWebhookEventModel, 
 
 const messageToStopTheBotFromReplying = 'Please give me a few minutes to fetch more information on this. We request you to stay connected with us'.toLocaleLowerCase();
 
+const messageSenderActorID = 'A-50843464';
+
 async function sendHubspotMessage({
   messageToReplyTo,
   conversationID,
@@ -361,7 +363,7 @@ async function sendHubspotMessage({
         `https://api.hubapi.com/conversations/v3/conversations/threads/${conversationID}/messages`,
         {
           type: "MESSAGE",
-          senderActorId: "A-45325045",
+          senderActorId: messageSenderActorID,
           text: text,
           richText: `<div>${text}</div>`,
           channelId: channelID,
